@@ -1,2 +1,2 @@
-# cloudpulse
+# CloudPulse
 A simple cloudburst prediction system.
