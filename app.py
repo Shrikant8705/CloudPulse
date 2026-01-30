@@ -1,5 +1,11 @@
 import streamlit as st
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+#Accessing api securly
+API_KEY=os.getenv("WEATHER_API_KEY")
 
 cities = {
     "Mumbai":{"lat":28.61 ,"lon":77.20},
@@ -29,28 +35,34 @@ if test_mode:
 lat = cities[selected_city]["lat"]
 lon = cities[selected_city]["lon"]
 #Function to fetch data
-def fetch_weather(lat,lon):
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=precipitation,relative_humidity_2m&hourly=precipitation"
+def fetch_weather(city,api_key):
+    url = f"http://api.weatherapi.com/v1/forecast.json?key={API_KEY}&q={lat},{lon}&days=1&aqi=no"
     try:
         response = requests.get(url)
+        
+        if response.status_code==401:
+            st.error("Invalid API Key")
+            return None 
         response.raise_for_status()
         return response.json()
+    
     except Exception as e:
         st.error(f"Error fetching data {e}")
         return None
+
 #Main logic
 if st.button("Check Risk!"):
     if test_mode:
         hourly_rain=[rain_now] *24
     else:
         data=fetch_weather(lat,lon)
-        
+
         if data is None:
             st.stop() #Stop if api fails
 
-        rain_now = data["current"]["precipitation"]
-        humidity_now=data["current"]["precipitation"]
-        hourly_rain_list=data["hourly"]["precipitation"][:24] #:24 added For 24 hours    
+        rain_now=data["current"]["precip_mm"]
+        humidity_now=data["current"]["humidity"]
+        hourly_rain=[hour["precip_mm"] for hour in data["forecast"]["forecastday"][0]["hour"]]
 
     #Displaying in columns
     col1,col2=st.columns(2)
