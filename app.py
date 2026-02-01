@@ -13,16 +13,7 @@ cities = {
     "Delhi":{"lat":28.6519, "lon":77.2315},
     "Bengaluru":{"lat":12.9719,"lon":77.5937},
     "Hyderabad":{"lat":17.384, "lon":78.4564},
-    "London"cities = {
-    "Mumbai":{"lat":28.61 ,"lon":77.20},
-    "Pune":{"lat":18.5196, "lon":73.8554},
-    "Delhi":{"lat":28.6519, "lon":77.2315},
-    "Bengaluru":{"lat":12.9719,"lon":77.5937},
-    "Hyderabad":{"lat":17.384, "lon":78.4564},
     "London": {"lat": 51.50, "lon": -0.12},
-    "Spain":{"lat":40.463667,"lon":-3.74922},
-    "Cherrapunji": {"lat": 25.27, "lon": 91.73}
-    }: {"lat": 51.50, "lon": -0.12},
     "Spain":{"lat":40.463667,"lon":-3.74922},
     "Cherrapunji": {"lat": 25.27, "lon": 91.73}
     }
@@ -45,7 +36,7 @@ if test_mode:
 lat = cities[selected_city]["lat"]
 lon = cities[selected_city]["lon"]
 #Function to fetch data
-def fetch_weather(city,api_key):
+def fetch_weather(city,API_KEY):
     url = f"http://api.weatherapi.com/v1/forecast.json?key={API_KEY}&q={lat},{lon}&days=1&aqi=no"
     try:
         response = requests.get(url)
