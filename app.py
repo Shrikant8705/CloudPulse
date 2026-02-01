@@ -13,7 +13,17 @@ cities = {
     "Delhi":{"lat":28.6519, "lon":77.2315},
     "Bengaluru":{"lat":12.9719,"lon":77.5937},
     "Hyderabad":{"lat":17.384, "lon":78.4564},
+    "London"cities = {
+    "Mumbai":{"lat":28.61 ,"lon":77.20},
+    "Pune":{"lat":18.5196, "lon":73.8554},
+    "Delhi":{"lat":28.6519, "lon":77.2315},
+    "Bengaluru":{"lat":12.9719,"lon":77.5937},
+    "Hyderabad":{"lat":17.384, "lon":78.4564},
     "London": {"lat": 51.50, "lon": -0.12},
+    "Spain":{"lat":40.463667,"lon":-3.74922},
+    "Cherrapunji": {"lat": 25.27, "lon": 91.73}
+    }: {"lat": 51.50, "lon": -0.12},
+    "Spain":{"lat":40.463667,"lon":-3.74922},
     "Cherrapunji": {"lat": 25.27, "lon": 91.73}
     }
 #Title and some text for description
