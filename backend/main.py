@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.weather_service import fetch_weather
-from backend.risk_engine import assess_risk
-from backend.utils import load_cities
+import json
+
+try:
+    from backend.ml_model import predictor
+except:
+    predictor = None
 
 app = FastAPI(title="CloudPulse API")
 
@@ -14,34 +17,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def load_cities():
+    with open('data/cities.json') as f:
+        return json.load(f)
+    
 @app.get("/")
 def root():
-    return {"message": "CloudPulse API is running"}
+    return {"message": "CloudPulse API","ml_avaliable": predictor.model is not None}
 
 @app.get("/api/cities")
 def get_cities():
-    """Get all available cities"""
     return load_cities()
 
-@app.get("/api/weather/{city}")
-def get_weather(city: str):
-    """Get weather data for a city"""
-    cities = load_cities()
-    
-    if city not in cities:
-        return {"error": "City not found"}
-    
-    coords = cities[city]
-    weather_data = fetch_weather(coords["lat"], coords["lon"])
-    
-    if not weather_data:
-        return {"error": "Failed to fetch weather"}
-    
-    # Add risk assessment
-    risk = assess_risk(weather_data["rainfall"], weather_data["humidity"])
+@app.get("/api/predict")
+def predict(rainfall: float, humidity: float, pressure: float = 1013, temperature: float = 25):
+    #Testing prediction model and endpoint
+    if predictor and predictor.model:
+        ml_result=predictor.predict(rainfall,humidity,pressure,temperature)
+    else:
+        ml_result={"available":False}
+ 
+# Simple rule-based
+    rule_based = {
+        "risk": "HIGH" if rainfall > 30 and humidity > 80 else "LOW",
+        "message": "🚨 High Risk!" if rainfall > 30 and humidity > 80 else "✅ Safe"
+    }
     
     return {
-        **weather_data,
-        "risk": risk,
-        "city": city
+        "input": {"rainfall": rainfall, "humidity": humidity, "pressure": pressure, "temp": temperature},
+        "rule_based": rule_based,
+        "ml_prediction": ml_result
     }
