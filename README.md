@@ -15,7 +15,6 @@ Machine learning system for predicting cloudbursts and extreme weather events.
 - Python
 - TensorFlow & Scikit-learn
 - Flask/FastAPI
-- PostgreSQL
 
 ## Quick Start
 
@@ -30,15 +29,6 @@ cd CloudPulse
 pip install -r requirements.txt
 ```
 
-3. Download data:
-```bash
-python scripts/download_data.py
-```
-
-4. Run predictions:
-```bash
-python backend/predict.py
-```
 
 ## Use Cases
 
