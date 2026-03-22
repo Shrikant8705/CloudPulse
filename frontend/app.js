@@ -1,321 +1,274 @@
-// Configuration
-const API_URL = 'http://localhost:8000/api';
-let rainfallChart = null;
+const API_BASE_URL = 'http://localhost:8000/api';
 
-// Initialize app on page load
+// State Management
+let allCities = [];
+let selectedCity = null;
+
+
+// INITIALIZATION
+
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('CloudPulse initialized');
     loadCities();
-    updateTime();
-    setInterval(updateTime, 1000);
-    
-    // Event listeners
-    document.getElementById('checkBtn').addEventListener('click', checkWeather);
-    document.getElementById('testMode').addEventListener('change', handleTestMode);
+    setupEventListeners();
 });
 
-// Update current time display
- 
-function updateTime() {
-    const now = new Date();
-    const timeString = now.toLocaleString('en-US', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+function setupEventListeners() {
+    // Search input
+    document.getElementById('citySearch').addEventListener('input', handleSearch);
+    
+    // Predict button
+    document.getElementById('predictBtn').addEventListener('click', handlePrediction);
+    
+    // City select
+    document.getElementById('citySelect').addEventListener('change', (e) => {
+        selectedCity = e.target.value;
     });
-    document.getElementById('currentTime').textContent = timeString;
 }
 
-// load cities from api
+// CITY LOADING & SEARCH
+
 async function loadCities() {
     try {
-        const response = await fetch(`${API_URL}/cities`);
-        const cities = await response.json();
+        showStatus('Loading cities...');
         
-        const select = document.getElementById('citySelect');
-        select.innerHTML = '<option value="">Select a city...</option>';
+        const response = await fetch(`${API_BASE_URL}/cities`);
+        if (!response.ok) throw new Error('Failed to load cities');
         
-        Object.keys(cities).sort().forEach(city => {
-            const option = document.createElement('option');
-            option.value = city;
-            option.textContent = city;
-            select.appendChild(option);
-        });
+        const data = await response.json();
+        allCities = data.cities;
+        
+        populateCityDropdown(allCities.slice(0, 100)); // Show first 100
+        
+        document.getElementById('cityCount').textContent = `${data.count}`;
+        console.log(`✅ Loaded ${data.count} cities`);
         
     } catch (error) {
         console.error('Error loading cities:', error);
-        showError('Failed to load cities. Please refresh the page.');
+        showError('Failed to load cities. Check if backend is running.');
     }
 }
 
-//handle test mode toggle
-
-function handleTestMode(event) {
-    const isTestMode = event.target.checked;
-    const checkBtn = document.getElementById('checkBtn');
+function populateCityDropdown(cities) {
+    const select = document.getElementById('citySelect');
+    select.innerHTML = '<option value="">-- Select a city --</option>';
     
-    if (isTestMode) {
-        checkBtn.textContent = '🧪 Test with Simulated Data';
-        checkBtn.classList.add('bg-gradient-to-r', 'from-yellow-500', 'to-orange-500');
-        checkBtn.classList.remove('from-indigo-600', 'to-purple-600');
-    } else {
-        checkBtn.textContent = '🔍 Check Weather Risk';
-        checkBtn.classList.remove('from-yellow-500', 'to-orange-500');
-        checkBtn.classList.add('from-indigo-600', 'to-purple-600');
-    }
+    cities.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        select.appendChild(option);
+    });
 }
 
-//Check weather for selected city
- 
-async function checkWeather() {
-    const city = document.getElementById('citySelect').value;
-    const testMode = document.getElementById('testMode').checked;
+async function handleSearch() {
+    const query = document.getElementById('citySearch').value.trim();
     
-    if (!city && !testMode) {
-        showError('Please select a city');
+    if (query.length < 2) {
+        populateCityDropdown(allCities.slice(0, 100));
         return;
     }
     
-    // Show loading, hide results and errors
+    try {
+        const response = await fetch(`${API_BASE_URL}/search-cities/${encodeURIComponent(query)}`);
+        const data = await response.json();
+        
+        if (data.matches.length === 0) {
+            document.getElementById('citySelect').innerHTML = '<option value="">No cities found</option>';
+            return;
+        }
+        
+        populateCityDropdown(data.matches);
+        
+    } catch (error) {
+        console.error('Search error:', error);
+    }
+}
+
+// PREDICTION
+
+async function handlePrediction() {
+    const city = document.getElementById('citySelect').value;
+    
+    if (!city) {
+        alert('⚠️ Please select a city first!');
+        return;
+    }
+    
+    console.log('Predicting for city:', city);
+    
     showLoading(true);
-    hideError();
     hideResults();
     
     try {
-        let data;
+        const response = await fetch(`${API_BASE_URL}/weather/${encodeURIComponent(city)}`);
         
-        if (testMode) {
-            // Use test endpoint with simulated data
-            const rainfall = Math.floor(Math.random() * 100);
-            const humidity = Math.floor(Math.random() * 100);
-            const response = await fetch(`${API_URL}/test?rainfall=${rainfall}&humidity=${humidity}`);
-            data = await response.json();
-        } else {
-            // Fetch real data
-            const response = await fetch(`${API_URL}/weather/${city}`);
-            
-            if (!response.ok) {
-                throw new Error(`Failed to fetch weather data: ${response.statusText}`);
-            }
-            
-            data = await response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
-        // Display results
+        const data = await response.json();
+        console.log('Received data:', data);
+        
+        showLoading(false);
         displayResults(data);
         
     } catch (error) {
-        console.error('Error fetching weather:', error);
-        showError('Failed to fetch weather data. Please try again.');
-    } finally {
         showLoading(false);
+        console.error('Prediction error:', error);
+        alert(`❌ Error: ${error.message}\n\nMake sure the backend is running!`);
     }
 }
 
-/**
- * Display weather results
- */
+// DISPLAY RESULTS
+
 function displayResults(data) {
-    const { city, weather, risk } = data;
+    // Show results container
+    document.getElementById('results').classList.remove('hidden');
     
-    // Update city info
-    document.getElementById('cityName').textContent = city || 'Test City';
-    if (data.coordinates) {
-        document.getElementById('coords').textContent = 
-            `${data.coordinates.lat.toFixed(2)}°N, ${data.coordinates.lon.toFixed(2)}°E`;
-    }
+    // City Info
+    document.getElementById('cityName').textContent = data.city;
+    document.getElementById('cityRegion').textContent = data.region || '';
+    document.getElementById('lastUpdated').textContent = formatDateTime(data.weather.last_updated);
     
-    // Update metrics
-    document.getElementById('rainfall').textContent = `${weather.rainfall} mm`;
-    document.getElementById('humidity').textContent = `${weather.humidity}%`;
-    document.getElementById('temperature').textContent = `${weather.temperature}°C`;
-    document.getElementById('pressure').textContent = `${weather.pressure} hPa`;
+    // Weather Cards
+    document.getElementById('displayRainfall').textContent = `${data.weather.rainfall} mm`;
+    document.getElementById('displayHumidity').textContent = `${data.weather.humidity}%`;
+    document.getElementById('displayTemp').textContent = `${data.weather.temperature}°C`;
+    document.getElementById('displayPressure').textContent = `${data.weather.pressure} hPa`;
     
-    // Update risk alert
-    displayRiskAlert(risk);
+    // Predictions
+    displayRuleBasedResult(data.predictions.rule_based);
+    displayMLResult(data.predictions.ml_prediction);
     
-    // Update risk score
-    displayRiskScore(risk.score);
-    
-    // Update chart
-    updateChart(weather.hourly_rain);
-    
-    // Update recommendations
-    displayRecommendations(risk.actions || []);
-    
-    // Show results
-    showResults();
+    // Scroll to results
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/**
- * Display risk alert banner
- */
-function displayRiskAlert(risk) {
-    const alertDiv = document.getElementById('riskAlert');
+function displayRuleBasedResult(ruleBased) {
+    const ruleDiv = document.getElementById('ruleResult');
     
-    const colorMap = {
-        error: 'bg-red-100 border-red-500 text-red-800',
-        warning: 'bg-yellow-100 border-yellow-500 text-yellow-800',
-        info: 'bg-blue-100 border-blue-500 text-blue-800',
-        success: 'bg-green-100 border-green-500 text-green-800'
+    const riskLevels = {
+        'CRITICAL': { icon: '🚨', color: 'border-red-500', textColor: 'text-red-600' },
+        'HIGH': { icon: '⚠️', color: 'border-orange-500', textColor: 'text-orange-600' },
+        'MODERATE': { icon: '💧', color: 'border-yellow-500', textColor: 'text-yellow-600' },
+        'LOW': { icon: '✅', color: 'border-green-500', textColor: 'text-green-600' }
     };
     
-    const iconMap = {
-        error: '🚨',
-        warning: '⚠️',
-        info: '💧',
-        success: '✅'
-    };
+    const level = riskLevels[ruleBased.level] || riskLevels['LOW'];
     
-    alertDiv.className = `border-l-4 p-6 ${colorMap[risk.type]}`;
-    alertDiv.innerHTML = `
-        <div class="flex items-center">
-            <span class="text-4xl mr-4">${iconMap[risk.type]}</span>
-            <div>
-                <div class="text-2xl font-bold mb-1">${risk.message}</div>
-                <div class="text-sm opacity-75">Risk Level: ${risk.level.toUpperCase()}</div>
+    ruleDiv.className = `bg-gray-800/90 backdrop-blur rounded-3xl shadow-2xl p-8 border-4 ${level.color}`;
+    ruleDiv.innerHTML = `
+        <div class="text-center">
+            <div class="text-sm font-semibold text-gray-400 mb-2">METEOROLOGICAL ANALYSIS</div>
+            <div class="text-6xl mb-4">${level.icon}</div>
+            <div class="text-4xl font-bold mb-3 ${level.textColor}">
+                ${ruleBased.level}
+            </div>
+            <p class="text-lg text-gray-300 mb-4">${ruleBased.message}</p>
+            <div class="text-sm text-gray-400">
+                Risk Score: <span class="font-bold text-white">${ruleBased.risk_score}/100</span>
+            </div>
+            ${renderRiskFactors(ruleBased.factors)}
+        </div>
+    `;
+}
+
+function displayMLResult(mlPred) {
+    const mlDiv = document.getElementById('mlResult');
+    
+    if (!mlPred.available) {
+        mlDiv.innerHTML = '<p class="text-xl text-center">⚠️ ML Model Unavailable</p>';
+        return;
+    }
+    
+    const prob = mlPred.probability;
+    const isHighRisk = mlPred.prediction === 'HIGH RISK';
+    
+    mlDiv.innerHTML = `
+        <div class="text-center">
+            <div class="text-sm font-semibold text-white/70 mb-2">AI MACHINE LEARNING</div>
+            <div class="text-6xl mb-4">${isHighRisk ? '⚠️' : '🛡️'}</div>
+            <div class="text-4xl font-bold mb-3">${mlPred.prediction}</div>
+            <div class="text-2xl mb-4">Cloudburst Probability: ${prob.toFixed(1)}%</div>
+            <div class="w-full bg-white/30 rounded-full h-4 mb-4">
+                <div class="bg-white h-4 rounded-full transition-all duration-1000" 
+                     style="width: ${prob}%"></div>
+            </div>
+            <div class="text-sm opacity-75">Model Confidence: ${mlPred.confidence.toFixed(1)}%</div>
+        </div>
+    `;
+    
+    // Update overall risk bar
+    updateRiskBar(prob);
+}
+
+function renderRiskFactors(factors) {
+    if (!factors || factors.length === 0) return '';
+    
+    return `
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <div class="text-xs text-gray-400 mb-2">Risk Factors:</div>
+            <div class="text-sm text-gray-300 text-left">
+                ${factors.map(f => `• ${f}`).join('<br>')}
             </div>
         </div>
     `;
 }
 
-/**
- * Display risk score
- */
-function displayRiskScore(score) {
-    document.getElementById('riskScore').textContent = score;
-    
+function updateRiskBar(probability) {
     const bar = document.getElementById('riskBar');
-    bar.style.width = `${score}%`;
+    const percentage = document.getElementById('riskPercentage');
     
-    // Color based on score
-    if (score >= 80) {
-        bar.className = 'h-4 rounded-full bg-gradient-to-r from-red-500 to-red-700 transition-all duration-500';
-    } else if (score >= 60) {
-        bar.className = 'h-4 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 transition-all duration-500';
-    } else if (score >= 40) {
-        bar.className = 'h-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500';
-    } else {
-        bar.className = 'h-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all duration-500';
-    }
+    bar.style.width = `${probability}%`;
+    percentage.textContent = `${probability.toFixed(1)}%`;
 }
 
-//Update rainfall chart
 
-function updateChart(hourlyData) {
-    const ctx = document.getElementById('rainfallChart').getContext('2d');
-    
-    // Destroy existing chart
-    if (rainfallChart) {
-        rainfallChart.destroy();
-    }
-    
-    // Create new chart
-    rainfallChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Array.from({length: 24}, (_, i) => `${i}:00`),
-            datasets: [{
-                label: 'Rainfall (mm)',
-                data: hourlyData,
-                borderColor: 'rgb(79, 70, 229)',
-                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 3,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: 'rgb(79, 70, 229)',
-                    borderWidth: 1
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Rainfall (mm)'
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Hour'
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
-            }
-        }
-    });
-}
-
-//Display recommendations
-
-function displayRecommendations(actions) {
-    const list = document.getElementById('actionsList');
-    list.innerHTML = '';
-    
-    if (actions.length === 0) {
-        list.innerHTML = '<li class="text-gray-600">No specific actions required</li>';
-        return;
-    }
-    
-    actions.forEach(action => {
-        const li = document.createElement('li');
-        li.className = 'flex items-start';
-        li.innerHTML = `
-            <span class="text-indigo-600 mr-2">▶</span>
-            <span class="text-gray-700">${action}</span>
-        `;
-        list.appendChild(li);
-    });
-}
-
-//UI Helper Functions
-
+// UI HELPERS
 function showLoading(show) {
-    document.getElementById('loading').classList.toggle('hidden', !show);
-}
-
-function showResults() {
-    document.getElementById('results').classList.remove('hidden');
+    const loading = document.getElementById('loading');
+    if (show) {
+        loading.classList.remove('hidden');
+    } else {
+        loading.classList.add('hidden');
+    }
 }
 
 function hideResults() {
     document.getElementById('results').classList.add('hidden');
 }
 
-function showError(message) {
-    document.getElementById('errorText').textContent = message;
-    document.getElementById('errorMessage').classList.remove('hidden');
+function showStatus(message) {
+    console.log('Status:', message);
 }
 
-function hideError() {
-    document.getElementById('errorMessage').classList.add('hidden');
+function showError(message) {
+    console.error('Error:', message);
+    alert('❌ ' + message);
 }
+
+function formatDateTime(dateStr) {
+    if (!dateStr) return '--';
+    
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// CONSOLE INFO
+console.log(`
+╔═══════════════════════════════════════╗
+║      CloudPulse Frontend v2.0        ║
+║   A Cloudburst Prediction System    ║
+╚═══════════════════════════════════════╝
+
+API: ${API_BASE_URL}
+Status: Ready
+`);
