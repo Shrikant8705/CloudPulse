@@ -248,3 +248,61 @@ def predict_custom(
             "ml_prediction": ml_prediction
         }
     }
+@app.get("/api/featured-cities")
+def get_featured_cities():
+    """Get cities currently showing cloudburst risk"""
+    
+    high_risk = []
+    
+    for city, data in CITIES_DATA.items():
+        rainfall = data["rainfall"]
+        humidity = data["humidity"]
+        
+        # Filter for actual risk conditions
+        if rainfall > 20 or (rainfall > 10 and humidity > 80):
+            risk = assess_rule_based_risk(rainfall, humidity, data["pressure"])
+            
+            high_risk.append({
+                "city": city,
+                "region": data["region"],
+                "rainfall": rainfall,
+                "humidity": humidity,
+                "risk_score": risk["risk_score"],
+                "risk_level": risk["level"]
+            })
+    
+    # Sort by risk score (highest first)
+    high_risk.sort(key=lambda x: x["risk_score"], reverse=True)
+    
+    # Get top 20 high risk
+    top_high_risk = high_risk[:20]
+    
+    # Also add some major cities for demo
+    major_cities = ["Mumbai", "Delhi", "Bangalore", "Kolkata", "Chennai", 
+                   "Hyderabad", "Pune", "Ahmedabad", "Jaipur", "Lucknow"]
+    
+    featured = []
+    for city in major_cities:
+        if city in CITIES_DATA:
+            data = CITIES_DATA[city]
+            risk = assess_rule_based_risk(data["rainfall"], data["humidity"], data["pressure"])
+            featured.append({
+                "city": city,
+                "region": data["region"],
+                "rainfall": data["rainfall"],
+                "humidity": data["humidity"],
+                "risk_score": risk["risk_score"],
+                "risk_level": risk["level"],
+                "type": "major"
+            })
+    
+    # Add high risk cities
+    for item in top_high_risk:
+        if item["city"] not in major_cities:
+            item["type"] = "high_risk"
+            featured.append(item)
+    
+    return {
+        "featured": featured[:30],  # Top 30 total
+        "count": len(featured)
+    }
