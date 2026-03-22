@@ -1,0 +1,50 @@
+/* CloudPulse Custom Styles */
+
+/* Smooth transitions */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* Scrollbar styling */
+#citySelect {
+    scrollbar-width: thin;
+    scrollbar-color: #4B5563 #1F2937;
+}
+
+#citySelect::-webkit-scrollbar {
+    width: 8px;
+}
+
+#citySelect::-webkit-scrollbar-track {
+    background: #1F2937;
+    border-radius: 10px;
+}
+
+#citySelect::-webkit-scrollbar-thumb {
+    background: #4B5563;
+    border-radius: 10px;
+}
+
+#citySelect::-webkit-scrollbar-thumb:hover {
+    background: #6B7280;
+}
+
+/* Option hover effect */
+#citySelect option:hover {
+    background-color: #374151;
+}
+
+/* Loading animation */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#results {
+    animation: fadeIn 0.5s ease-in-out;
+}
