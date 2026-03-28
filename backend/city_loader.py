@@ -43,7 +43,7 @@ def load_indian_weather_data():
 
 def save_to_json():
     #Save processed data to JSON for faster api loading
-    os.makedir('data', exist_ok=True)
+    os.makedirs('data', exist_ok=True)
     cities_data=load_indian_weather_data()
 
     if cities_data:
