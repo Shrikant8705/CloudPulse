@@ -1,27 +1,29 @@
 import pandas as pd
 import json
+import os
 
 def load_indian_weather_data():
 
     # Load Indian weather data from CSV ,Returns dict of cities with weather and coordinates
     try:
-        df = pd.read_csv('data/IndianWeatherRepository.csv')
+        df = pd.read_csv('data/GlobalWeatherRepository.csv')
         
-        # Remove duplicates (keep first occurrence of each city)
-        df = df.drop_duplicates(subset=['location_name'], keep='first')
-        
-        cities_data = {}
+        #filter only for india
+        if 'country' in df.columns:
+            df= df[df['country']=='India']
+
+        #remove duplicates
+        df= df.drop_duplicates(subset=['location_name'], keep='first')
+
+        cities_data={}
         
         for _, row in df.iterrows():
             city_name = row['location_name']
-            
+
             cities_data[city_name] = {
-                # Location info
-                "region": row['region'],
+                "region": row.get('region', 'Unknown'),
                 "lat": float(row['latitude']),
                 "lon": float(row['longitude']),
-                
-                # Weather data
                 "rainfall": float(row['precip_mm']),
                 "humidity": int(row['humidity']),
                 "pressure": float(row['pressure_mb']),
@@ -29,37 +31,25 @@ def load_indian_weather_data():
                 "wind_speed": float(row['wind_kph']),
                 "condition": row['condition_text'],
                 "last_updated": row['last_updated'],
-                
-                # Additional useful data
-                "cloud_cover": int(row['cloud']),
-                "visibility": float(row['visibility_km']),
-                "uv_index": float(row['uv_index'])
+                "cloud_cover": int(row.get('cloud', 0)),
+                "visibility": float(row.get('visibility_km', 10.0)),
+                "uv_index": float(row.get('uv_index', 0.0))
             }
-        
-        print(f"✅ Loaded {len(cities_data)} Indian cities with weather data")
-        
-        # Show some examples
-        print("\nSample cities loaded:")
-        for i, city in enumerate(list(cities_data.keys())[:5]):
-            print(f"  - {city} ({cities_data[city]['region']})")
-        
-        return cities_data
-        
+        print(f"✅ Filtered and loaded {len(cities_data)} Indian cities with weather data")
+        return{}
+    
     except Exception as e:
-        print(f"❌ Error loading CSV: {e}")
-        return {}
+        print(f"❌ Error loading .csv file:{e}")
 
 def save_to_json():
-    """Save processed data to JSON for faster loading"""
-    cities_data = load_indian_weather_data()
-    
-    with open('data/indian_cities_weather.json', 'w', encoding='utf-8') as f:
-        json.dump(cities_data, f, indent=2, ensure_ascii=False)
-    
-    print(f"\n💾 Saved to data/indian_cities_weather.json")
-    print(f"   Total cities: {len(cities_data)}")
-    
-    return cities_data
+    #Save processed data to JSON for faster api loading
+    os.makedir('data', exist_ok=True)
+    cities_data=load_indian_weather_data()
+
+    if cities_data:
+        with open('data/indian_cities_weather.json', 'w', encoding='utf-8') as f:
+            json.dump(cities_data, f, indent=2, ensure_ascii=False)
+        print(f"💾 Saved to data/indian_cities_weather.json")
 
 if __name__ == "__main__":
     save_to_json()
