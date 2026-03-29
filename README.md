@@ -4,7 +4,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-green.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**AI-Powered Cloudburst Prediction System** combining meteorological analysis with machine learning to predict extreme rainfall events in Indian cities.
+**ML Based Cloudburst Prediction System** combining meteorological analysis with machine learning to predict extreme rainfall events in Indian cities.
 
 ![CloudPulse Banner](docs/banner.png) <!-- Add your screenshot here -->
 
