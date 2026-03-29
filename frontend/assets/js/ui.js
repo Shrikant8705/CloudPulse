@@ -9,7 +9,7 @@ export const UI = {
 
     //Show/hide results
     showResults(show = true) {
-        Utils.toggleElement('results', !show);
+        Utils.toggleElement('results', show); // <-- Removed the "!" here
     },
 
     //Show error message

@@ -3,115 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudPulse - A Cloudburst Prediction</title>
+    <title>CloudPulse - AI Cloudburst Predictor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="assets/css/custom.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
+<body class="bg-gradient-to-br from-[#0B101E] via-[#1A233A] to-[#0f172a] min-h-screen text-gray-100">
+    
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="container mx-auto px-4 py-12 relative z-10">
         
-        <!-- Header -->
-        <header class="text-center mb-12">
-            <h1 class="text-6xl font-bold text-white mb-4 drop-shadow-2xl">
-                ⛈️ CloudPulse
-            </h1>
-            <p class="text-xl text-gray-300 mb-4">A Cloudburst Prediction System</p>
-            <div class="inline-flex items-center bg-green-500 text-white px-6 py-3 rounded-full shadow-lg">
-                <span class="w-3 h-3 bg-white rounded-full mr-3 animate-pulse"></span>
-                <span class="font-semibold">ML Model Active</span>
+        <header class="text-center mb-16">
+            <div class="inline-block p-4 bg-white/10 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl mb-6 transform hover:scale-105 transition-transform duration-300">
+                <h1 class="text-6xl font-extrabold text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+                    <span class="text-blue-400">⛈️ Cloud</span>Pulse
+                </h1>
+            </div>
+            <p class="text-2xl text-blue-200 mb-6 font-light tracking-wide">Real-Time AI Cloudburst Prediction System</p>
+            
+            <div class="inline-flex items-center bg-gray-800/80 backdrop-blur-sm border border-green-500/50 px-6 py-3 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.4)]">
+                <span class="w-3 h-3 bg-green-400 rounded-full mr-3 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]"></span>
+                <span class="font-bold text-green-400 tracking-wide uppercase text-sm">Random Forest AI Active</span>
             </div>
         </header>
 
-        <!-- City Selection Card -->
-        <section class="max-w-3xl mx-auto bg-gray-800/90 backdrop-blur rounded-3xl shadow-2xl p-8 mb-8 border border-gray-700">
-            <h2 class="text-3xl font-bold text-white mb-6 text-center">Select Your City</h2>
+        <section class="max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-xl rounded-[2rem] shadow-[0_0_40px_rgba(0,0,0,0.5)] p-10 mb-12 border border-white/20 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-purple-500"></div>
+
+            <h2 class="text-3xl font-bold text-white mb-8 text-center drop-shadow-md">Location Assessment</h2>
             
-            <!-- Search Input -->
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-300 mb-2">🔍 Search City</label>
+            <div class="mb-6 relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span class="text-gray-400">🔍</span>
+                </div>
                 <input 
                     type="text" 
                     id="citySearch" 
-                    placeholder="Search for a city..."
-                    class="w-full px-4 py-4 rounded-xl border-2 border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none text-lg"
+                    placeholder="Search for an Indian city..."
+                    class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-600 bg-gray-900 text-white placeholder-gray-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none text-lg transition-all"
                 >
             </div>
 
-            <!-- City Dropdown -->
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-300 mb-2">🏙️ Select City</label>
+            <div class="mb-8 relative">
+                <div class="absolute inset-y-0 left-0 pl-4 pt-4 pointer-events-none">
+                    <span class="text-gray-400">📍</span>
+                </div>
                 <select 
                     id="citySelect" 
-                    size="8"
-                    class="w-full px-4 py-2 rounded-xl border-2 border-gray-600 bg-gray-700 text-white focus:border-blue-500 focus:outline-none text-lg">
-                    <option value="">Loading cities...</option>
+                    size="6"
+                    class="w-full pl-12 pr-4 py-3 rounded-2xl border-2 border-gray-600 bg-gray-900 text-white focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 focus:outline-none text-lg transition-all shadow-inner custom-scrollbar">
+                    <option value="" class="py-2 text-gray-500 italic">Initializing live satellite feed...</option>
                 </select>
             </div>
 
-            <!-- Predict Button -->
             <button 
                 id="predictBtn"
-                class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-5 px-8 rounded-xl transition duration-300 transform hover:scale-105 shadow-xl text-xl disabled:opacity-50 disabled:cursor-not-allowed">
-                🔮 Get Prediction
+                class="w-full relative group overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.8)] text-xl disabled:opacity-50 disabled:cursor-not-allowed border border-blue-400/50">
+                <span class="relative z-10 flex items-center justify-center gap-2 drop-shadow-md">
+                    <span class="text-2xl">🔮</span> Analyze Cloudburst Risk
+                </span>
             </button>
 
-            <!-- City Count -->
-            <p class="mt-4 text-center text-sm text-gray-400">
-                <span id="cityCount">0</span> cities available
+            <p class="mt-6 text-center text-sm text-gray-300 font-medium tracking-wide">
+                Monitoring <span id="cityCount" class="font-bold text-cyan-400">0</span> active locations
             </p>
         </section>
 
-        <!-- Loading Spinner -->
-        <div id="loading" class="hidden text-center mb-8">
-            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500"></div>
-            <p class="text-white text-xl mt-4">Analyzing weather data...</p>
+        <div id="loading" class="hidden text-center mb-12 py-8">
+            <div class="relative inline-block">
+                <div class="w-20 h-20 border-4 border-gray-600 rounded-full"></div>
+                <div class="w-20 h-20 border-4 border-cyan-400 rounded-full border-t-transparent animate-spin absolute top-0 left-0 shadow-[0_0_15px_rgba(34,211,238,0.5)]"></div>
+            </div>
+            <p class="text-cyan-300 text-xl mt-6 font-bold animate-pulse">Running Neural Network Analysis...</p>
         </div>
 
-        <!-- Results Container -->
-        <section id="results" class="max-w-5xl mx-auto hidden">
+        <section id="results" class="max-w-5xl mx-auto hidden transition-all duration-500">
             
-            <!-- City Info -->
-            <div class="bg-gray-800/90 backdrop-blur rounded-3xl shadow-2xl p-6 mb-6 border border-gray-700">
-                <div class="flex items-center justify-between">
+            <div class="bg-gray-800/80 backdrop-blur-xl rounded-[2rem] shadow-[0_0_40px_rgba(0,0,0,0.5)] p-8 mb-8 border border-white/20">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-3xl font-bold text-white" id="cityName"></h3>
-                        <p class="text-gray-400" id="cityRegion"></p>
+                        <h3 class="text-5xl font-black text-white mb-2 tracking-tight drop-shadow-lg" id="cityName"></h3>
+                        <div class="flex items-center gap-2">
+                            <span class="px-4 py-1.5 bg-gray-700 rounded-full text-sm font-bold text-gray-200 border border-gray-500" id="cityRegion"></span>
+                            <span class="px-4 py-1.5 bg-blue-600 text-white font-bold rounded-full text-sm shadow-[0_0_10px_rgba(37,99,235,0.5)]">Live Data</span>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-sm text-gray-400">Last Updated</p>
-                        <p class="text-gray-300 font-semibold" id="lastUpdated"></p>
+                    <div class="text-right bg-gray-900 p-5 rounded-2xl border border-gray-600 shadow-inner">
+                        <p class="text-sm text-gray-400 mb-1 uppercase tracking-wider font-bold">Satellite Sync Time</p>
+                        <p class="text-cyan-400 font-mono text-xl font-bold drop-shadow-sm" id="lastUpdated"></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Weather Cards Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="weatherCards">
-                <!-- Will be populated by JavaScript -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8" id="weatherCards"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div id="ruleResult" class="transform hover:-translate-y-1 transition-transform duration-300"></div>
+                <div id="mlResult" class="transform hover:-translate-y-1 transition-transform duration-300"></div>
             </div>
 
-            <!-- Predictions Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div id="ruleResult"></div>
-                <div id="mlResult"></div>
-            </div>
-
-            <!-- Risk Bar -->
-            <div class="bg-gray-800/90 backdrop-blur rounded-3xl shadow-2xl p-8 border border-gray-700">
-                <h3 class="text-2xl font-bold text-white mb-4 text-center">Overall Risk Assessment</h3>
-                <div class="relative pt-1">
-                    <div class="flex mb-2 items-center justify-between">
-                        <span class="text-xs font-semibold text-green-400">SAFE</span>
-                        <span class="text-xs font-semibold text-red-400">DANGER</span>
-                    </div>
-                    <div class="overflow-hidden h-6 mb-4 rounded-full bg-gray-700">
-                        <div id="riskBar" style="width:0%" 
-                             class="h-6 rounded-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-600 transition-all duration-1000">
+            <div class="bg-gray-800/80 backdrop-blur-xl rounded-[2rem] shadow-[0_0_40px_rgba(0,0,0,0.5)] p-10 border border-white/20 relative overflow-hidden">
+                <h3 class="text-3xl font-black text-white mb-8 text-center tracking-tight drop-shadow-md">System Risk Assessment</h3>
+                <div class="relative pt-1 max-w-3xl mx-auto">
+                    <div class="flex mb-4 items-center justify-between px-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🛡️</span>
+                            <span class="text-sm font-black text-green-400 tracking-widest uppercase drop-shadow-sm">Safe Zone</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-black text-red-500 tracking-widest uppercase drop-shadow-sm">Danger Zone</span>
+                            <span class="text-2xl">⚠️</span>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <span class="text-gray-300 text-sm">
-                            Risk Probability: <span id="riskPercentage" class="font-bold">0%</span>
-                        </span>
+                                        <div class="overflow-hidden h-10 mb-6 rounded-full bg-gray-950 border-2 border-gray-600 shadow-inner">
+                        <!-- ADDED INLINE STYLE BACKGROUND COLOR -->
+                        <div id="riskBar" style="width: 5%; background-color: #22c55e;" 
+                             class="h-full rounded-full transition-all duration-1000 ease-out relative">
+                        </div>
+                    </div>
+                    <div class="text-center mt-6">
+                        <div class="inline-block px-8 py-4 bg-gray-900 rounded-2xl border-2 border-gray-600 shadow-lg">
+                            <span class="text-gray-300 text-sm uppercase tracking-wider mr-3 font-bold">Probability of Cloudburst:</span>
+                            <span id="riskPercentage" class="font-black text-4xl text-white drop-shadow-md">0%</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,7 +139,14 @@
 
     </div>
 
-    <!-- Load JavaScript Modules -->
-    <script type="module" src="assets/js/main.js"></script>
+    <!-- Added ?v=2 to FORCE the browser to load the new file instead of the cached one -->
+    <script type="module" src="assets/js/main.js?v=2"></script>
+    
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+    </style>
 </body>
 </html>
