@@ -22,5 +22,5 @@ for _ in range(1000):
     })
 
 df = pd.DataFrame(data)
-df.to_csv('data/training_data.csv', index=False)
+df.to_csv('data/historical_weather.csv', index=False)
 print(f"✅ Generated {len(df)} samples, {df['cloudburst'].sum()} cloudburst cases")
