@@ -9,7 +9,7 @@ app = FastAPI(title="CloudPulse API- Indian Weather")
 
 # Allow frontend to call this API
 app.add_middleware(
-    CORSMiddleware,allow_origins=["*"], allow_methods=["*"],allow_headers=["*"]
+    CORSMiddleware,allow_origins=["*"], allow_methods=["*"],allow_headers=["*"],allow_credentials=True
     )
 
 def load_cities():
@@ -67,22 +67,36 @@ def search_cities(query: str):
     }
 @app.get("/api/weather/{city}")
 def get_weather_for_city(city: str):
-    #Get weather data and predictions for an Indian city
     #Check if city exists
     if city not in CITIES_DATA:
         raise HTTPException(404, f"City '{city}' not found. Try searching first.")
     
     city_data = CITIES_DATA[city]
     
-    #Use imported risk engine
-    rule_based= assess_rule_based_risk(city_data["rainfall"],city_data["humidity"],city_data["pressure"],city_data["region"])
-    ml_prediction= predictor.predict(city_data["rainfall"],city_data("humidity"),city_data["pressure"],city_data["region"])
+    # Use imported risk engine
+    rule_based = assess_rule_based_risk(
+        city_data["rainfall"],
+        city_data["humidity"],
+        city_data["pressure"],
+        city_data["region"]
+    )
     
-    return{
-        "city":city,
-        "region":city_data["region"],
-        "weather":city_data,
-        "predictions":{"rule_based": rule_based , "ml_prediction":ml_prediction}
+    # Use the ML model (Make sure we pass temperature, NOT region!)
+    ml_prediction = predictor.predict(
+        city_data["rainfall"],
+        city_data["humidity"],
+        city_data["pressure"],
+        city_data["temperature"]
+    )
+    
+    return {
+        "city": city,
+        "region": city_data["region"],
+        "weather": city_data,
+        "predictions": {
+            "rule_based": rule_based, 
+            "ml_prediction": ml_prediction
+        }
     }
 
 @app.get("/api/featured-cities")
@@ -90,7 +104,7 @@ def get_featured_cities():
     #Get cities currently showing cloudburst risk
     major_cities=[      
         "Shimla", "Dehradun", "Srinagar", "Gangtok", "Darjeeling", 
-        "Mumbai", "Delhi", "Bangalore"
+        "Mumbai", "Delhi", "Bangalore","Pune"
         ]
     featured=[]
 
