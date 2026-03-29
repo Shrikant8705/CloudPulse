@@ -15,7 +15,7 @@
 - 🤖 **Dual Prediction System**: Rule-based meteorological analysis + Random Forest ML model
 - 🌍 **9,840+ Indian Cities**: Comprehensive coverage with real weather data
 - 📊 **Real-time Analysis**: Instant weather parameter evaluation
-- 🎯 **95%+ Accuracy**: ML model trained on 1000+ weather patterns
+- 🎯 **95%+ Accuracy**: ML model trained on extensive weather patterns
 - 🎨 **Modern UI**: Clean, responsive interface with dark mode
 - ⚡ **Fast API**: RESTful backend with automatic documentation
 - 📈 **Risk Visualization**: Interactive charts and risk meters
@@ -29,8 +29,11 @@
 
 - Python 3.8 or higher
 - pip package manager
+- **Kaggle Account** (Required for downloading the dataset)
 
-### Installation
+### Installation & Data Setup
+
+> ⚠️ **Dataset Notice**: Due to file size constraints and GitHub's limitations, the main Indian Weather dataset is hosted on Kaggle. You must download it before running the application.
 
 1. **Clone the repository**
 ```bash
@@ -43,13 +46,29 @@
    pip install -r requirements.txt
 ```
 
-3. **Generate training data & train ML model**
+3. **Download the Dataset from Kaggle**
+   
+   **Option A: Manual Download**
+   - Visit the dataset on Kaggle: [Link to your Kaggle Dataset]
+   - Download the archive and extract `IndianWeatherRepository.csv` into the `data/` directory.
+
+   **Option B: Using Kaggle CLI**
+   - Ensure your `kaggle.json` API key is configured in `~/.kaggle/`
+   ```bash
+   pip install kaggle
+   cd data
+   kaggle datasets download -d [kaggle-username/dataset-name]
+   unzip [dataset-name].zip
+   cd ..
+   ```
+
+4. **Generate training data & train ML model**
 ```bash
    python data/synthetic_data.py
    python backend/train_model.py
 ```
 
-4. **Process Indian cities data**
+5. **Process Indian cities data**
 ```bash
    python backend/city_loader.py
 ```
@@ -77,7 +96,7 @@ http://localhost:8080
 ---
 
 ## 🏗️ Project Structure
-```
+```text
 CloudPulse/
 ├── backend/                    # Python FastAPI backend
 │   ├── main.py                # API endpoints & application entry
@@ -104,16 +123,17 @@ CloudPulse/
 │           └── custom.css     # Custom styles
 │
 ├── data/                       # Data files
-│   ├── IndianWeatherRepository.csv  # Raw weather data (9,840 cities)
-│   ├── indian_cities_weather.json   # Processed city data
-│   ├── training_data.csv           # ML training dataset
+│   ├── .gitkeep               # Ensures folder exists in repo
+│   ├── indian_cities_weather.json   # Processed city data (Generated)
+│   ├── training_data.csv           # ML training dataset (Generated)
 │   └── synthetic_data.py           # Training data generator
+│   # Note: IndianWeatherRepository.csv must be downloaded from Kaggle
 │
 ├── models/                     # Trained ML models
 │   ├── cloudburst_model.pkl   # Random Forest model
 │   └── scaler.pkl             # Feature scaler
 │
-├── .gitignore
+├── .gitignore                 # Configured to ignore large Kaggle CSVs
 ├── requirements.txt
 └── README.md
 ```
@@ -145,7 +165,7 @@ CloudPulse/
 ## 📊 API Documentation
 
 ### Base URL
-```
+```text
 http://localhost:8000
 ```
 
@@ -256,7 +276,7 @@ Visit `http://localhost:8000/docs` for Swagger UI with interactive testing.
 ## 🎯 How It Works
 
 ### 1. **Data Collection**
-- Uses real Indian weather data from 9,840 cities
+- Uses real Indian weather data sourced from **Kaggle** covering 9,840 cities.
 - Parameters: rainfall, humidity, atmospheric pressure, temperature
 
 ### 2. **Rule-Based Analysis**
@@ -383,6 +403,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Indian Meteorological Department (IMD) for weather data insights
 - OpenWeatherMap for API inspiration
+- Kaggle community for dataset hosting
 - FastAPI community for excellent documentation
 - scikit-learn team for ML tools
 
@@ -392,6 +413,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Cloudburst Research Papers](https://scholar.google.com/scholar?q=cloudburst+prediction)
 - [Indian Meteorological Department](https://mausam.imd.gov.in/)
+- [Kaggle Datasets](https://www.kaggle.com/datasets)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [scikit-learn Random Forest](https://scikit-learn.org/stable/modules/ensemble.html#forest)
 
